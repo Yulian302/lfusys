@@ -4,3 +4,6 @@
 [submodule "frontend/lfusys-app"]
 	path = frontend/lfusys-app
 	url = https://github.com/Yulian302/frontend-lfusys-app
+[submodule "backend/services"]
+	path = backend/services
+	url = https://github.com/Yulian302/lfusys-microservices.git
