@@ -1,9 +1,6 @@
 [submodule "backend/infra"]
 	path = backend/infra
 	url = https://github.com/Yulian302/infra-lfusys
-[submodule "backend/services/session"]
-	path = backend/services/session
-	url = https://github.com/Yulian302/backend-lfusys-session-service
 [submodule "frontend/lfusys-app"]
 	path = frontend/lfusys-app
 	url = https://github.com/Yulian302/frontend-lfusys-app
