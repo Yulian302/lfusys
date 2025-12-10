@@ -1,0 +1,12 @@
+
+.git/
+*.log
+**/tmp/
+dist/
+build/
+.env
+**/.DS_Store
+**/Thumbs.db
+
+# exclude infrastructure files and artifacts
+infra/
