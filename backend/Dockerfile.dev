@@ -19,3 +19,18 @@ COPY services/gateway/ ./
 RUN go install github.com/air-verse/air@latest
 
 CMD [ "air", "-c", ".air.toml"]
+
+# sessions service
+FROM base AS sessions
+
+WORKDIR /app/services/sessions
+
+COPY services/sessions/go.mod services/sessions/go.sum ./
+
+RUN go mod download
+
+COPY services/sessions/ ./
+
+RUN go install github.com/air-verse/air@latest
+
+CMD [ "air", "-c", ".air.toml"]
