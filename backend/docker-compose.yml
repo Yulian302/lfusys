@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: gateway
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./services/gateway/.env
+    depends_on:
+      - sessions
+    volumes:
+      - ./services/gateway:/app/services/gateway
+      - ./services/commons:/app/services/commons
+
+  sessions:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: sessions
+    env_file:
+      - ./services/sessions/.env
+    volumes:
+      - ./services/sessions:/app/services/sessions
+      - ./services/commons:/app/services/commons
+
+  uploads:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: uploads
+    env_file:
+      - ./services/uploads/.env
+    volumes:
+      - ./services/uploads:/app/services/uploads
+      - ./services/commons:/app/services/commons

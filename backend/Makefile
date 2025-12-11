@@ -28,6 +28,11 @@ build-all:
 		docker build . -f $(DOCKERFILE) --target $$service -t lfusys-services-$$service; \
 	done
 
+.PHONY: compose
+compose:
+	DOCKER_BUILDKIT=1 docker-compose up
+
+
 .PHONY: clean
 clean:
-	docker system prune -f
+	docker system prune -f 
