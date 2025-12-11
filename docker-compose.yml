@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  gateway:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+      target: gateway
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./backend/services/gateway/.env
+    depends_on:
+      - sessions
+    volumes:
+      - ./backend/services/gateway:/app/services/gateway
+      - ./backend/services/commons:/app/services/commons
+
+  sessions:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+      target: sessions
+    env_file:
+      - ./backend/services/sessions/.env
+    volumes:
+      - ./backend/services/sessions:/app/services/sessions
+      - ./backend/services/commons:/app/services/commons
+
+  uploads:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+      target: uploads
+    env_file:
+      - ./backend/services/uploads/.env
+    volumes:
+      - ./backend/services/uploads:/app/services/uploads
+      - ./backend/services/commons:/app/services/commons
+
+  frontend:
+    build:
+      context: ./frontend/lfusys-app
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/lfusys-app/src:/app/src
+      - /app/node_modules
