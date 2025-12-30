@@ -32,10 +32,19 @@ JWT authentication is implemented under the hood with the best security practice
 This section provides the diagrams for different layers of abstration in the system. It also includes design scratches `as is` to show how system changed and evolved. Initial diagrams may have flaws and may be overly opinionated, but it greatly depicts the engineer's thinking process and how can one come to a better architecture over time.
 
 ### Initial High-Level Design Sketch
-![Initial Design Sketch](./backend/infra/design/design.png)
+![Initial Design Sketch](https://github.com/Yulian302/lfusys-infra/blob/196796faccfee576463794a84295194094da6d1e/design/design.png)
 
 ## Evolved Service Interactions Diagram
-![Service Interactions Diagram](./backend/infra/design/evolution/20-12-2025-service-interaction-diagram.png)
+```mermaid
+
+flowchart LR
+    FE["React Frontend"] <-- HTTP --> GW["Gateway"]
+    GW <-- gRPC --> US["Sessions Service"]
+    US --> DDB1[("DynamoDB Uploads")]
+    GW --> DDB2[("DynamoDB Users")]
+    FE <-- HTTP --> UW["Upload Service"]
+    UW --> S3[("S3 Object Storage")]
+```
 
 ## Sequence Diagrams
 Here are a few sequence diagrams that represent core auth and business logic.
