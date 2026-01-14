@@ -26,7 +26,74 @@ The repository contains backend Go services (gateway, sessions, uploads, shared 
 - `session` service consumes the upload sessions from the queue and creates a final `File` object using assembly-based approach for contents storage.
 
 ## Authentication
-JWT authentication is implemented under the hood with the best security practices.
+### JWT
+JWT authentication is implemented under the hood with the best security practices. It is a default authentication mechanism.
+### OAuth2
+Third-party authentication mechanism is enabled. Users can choose among the following providers: **Github**, **Google**.
+#### OAuth2 Providers UML diagram
+```mermaid
+---
+config:
+  layout: elk
+---
+classDiagram
+        class OAuthProvider{
+            <<interface>>
+            +ExchangeCode(ctx, code) (OAuthUser, error)
+            +GetOAuthUser(ctx, token) (OAuthUser, error)
+        }
+
+        class GithubProvider{
+            -cfg    *github.GithubConfig
+	        -client *auth.Client
+            +ExchangeCode(ctx, code) (OAuthUser, error)
+            +GetOAuthUser(ctx, token) (OAuthUser, error)
+        }
+
+        class GoogleProvider{
+            -cfg    *google.GoogleConfig
+	        -client *auth.Client
+            +ExchangeCode(ctx, code) (OAuthUser, error)
+            +GetOAuthUser(ctx, token) (OAuthUser, error)
+        }
+
+        class Client {
+            -http *http.Client
+            +PostFormJSON(ctx, endpoint, data, out) error
+            +GetJSONWithToken(ctx, endpoint, token, out) error
+        }
+
+        class http.Client{
+            ...
+        }
+        class GithubConfig {
+            +ClientID     string
+            +ClientSecret string
+            +RedirectURI  string
+            +ExchangeURL  string
+            +FrontendURL  string
+        }
+
+        class GoogleConfig {
+            +ClientID     string
+            +ClientSecret string
+            +RedirectURI  string
+            +ExchangeURL  string
+            +FrontendURL  string
+        }
+
+
+        GithubProvider ..|> OAuthProvider: implements
+        GoogleProvider ..|> OAuthProvider: implements
+
+        Client --* http.Client: uses
+        GithubProvider --* Client: uses
+        GoogleProvider --* Client: uses
+
+        GithubProvider --* GithubConfig: uses
+        GoogleProvider --* GoogleConfig: uses
+```
+This architecture can be improved further, but it is an overhead for the system (no more third-party auth providers will be added).
 
 # Architecture
 This section provides the diagrams for different layers of abstration in the system. It also includes design scratches `as is` to show how system changed and evolved. Initial diagrams may have flaws and may be overly opinionated, but it greatly depicts the engineer's thinking process and how can one come to a better architecture over time.
