@@ -113,6 +113,10 @@ flowchart LR
     UW --> S3[("S3 Object Storage")]
 ```
 
+### UPDATED 14/01/2026
+![SI diagram](https://github.com/Yulian302/lfusys-infra/blob/master/design/evolution/14-01-2026-service-interaction-diagram.png)
+
+
 ## Sequence Diagrams
 Here are a few sequence diagrams that represent core auth and business logic.
 ### Login
