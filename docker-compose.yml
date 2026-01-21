@@ -47,3 +47,16 @@ services:
     volumes:
       - ./frontend/lfusys-app:/app
       - /app/node_modules
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly","yes"]
+
+volumes:
+  redis_data:
