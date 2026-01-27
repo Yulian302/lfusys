@@ -3,6 +3,8 @@ FROM golang:1.25.4-alpine AS base
 
 WORKDIR /app
 
+RUN go install github.com/air-verse/air@latest
+
 COPY services/commons/ ./services/commons/
 
 # gateway service
@@ -16,8 +18,6 @@ RUN go mod download
 
 COPY services/gateway/ ./
 
-RUN go install github.com/air-verse/air@latest
-
 CMD [ "air", "-c", ".air.toml"]
 
 # sessions service
@@ -30,8 +30,6 @@ COPY services/sessions/go.mod services/sessions/go.sum ./
 RUN go mod download
 
 COPY services/sessions/ ./
-
-RUN go install github.com/air-verse/air@latest
 
 CMD [ "air", "-c", ".air.toml"]
 
@@ -47,7 +45,5 @@ COPY services/uploads/go.sum ./
 RUN go mod download
 
 COPY services/uploads/ ./
-
-RUN go install github.com/air-verse/air@latest
 
 CMD [ "air", "-c", ".air.toml" ]
