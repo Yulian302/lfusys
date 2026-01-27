@@ -1,12 +1,32 @@
+# deps and build artifacts
+.tmp/
+tmp/
+.cache/
 
+
+# local dev files
 .git/
-*.log
-**/tmp/
-dist/
-build/
-.env
-**/.DS_Store
-**/Thumbs.db
+.gitignore
+.vscode/
+.idea/
+*.swp
+.DS_STORE
+Thumbs.db
+Makefile
 
-# exclude infrastructure files and artifacts
+# docs and logs
+*.log
+.cache
+README.md
+
+# Docker-related files
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+
+*lock
+
+
+# local project folders
 infra/

@@ -1,0 +1,58 @@
+# Common builder
+FROM golang:1.25.4-alpine AS builder
+WORKDIR /app
+COPY services/commons ./services/commons/
+
+# Gateway builder
+FROM builder AS gateway-builder
+WORKDIR /app/services/gateway
+COPY services/gateway/go.mod services/gateway/go.sum ./
+RUN go mod download
+COPY services/gateway/ ./
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -ldflags="-w -s" \
+    -o gateway .
+
+# Sessions builder
+FROM builder AS sessions-builder
+WORKDIR /app/services/sessions
+COPY services/sessions/go.mod services/sessions/go.sum ./
+RUN go mod download
+COPY services/sessions/ ./
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -ldflags="-w -s" \
+    -o sessions .
+
+# Uploads builder
+FROM builder AS uploads-builder
+WORKDIR /app/services/uploads
+COPY services/uploads/go.mod services/uploads/go.sum ./
+RUN go mod download
+COPY services/uploads/ ./
+RUN CGO_ENABLED=0 GOOS=linux go build \
+    -ldflags="-w -s" \
+    -o uploads-app .
+
+
+FROM gcr.io/distroless/base-debian12 AS gateway-prod
+WORKDIR /
+COPY --from=gateway-builder /app/services/gateway/gateway /gateway
+COPY --from=gateway-builder /app/services/gateway/.env /.env
+USER nonroot:nonroot
+EXPOSE 8080
+ENTRYPOINT [ "/gateway" ]
+
+FROM gcr.io/distroless/base-debian12 AS sessions-prod
+WORKDIR /
+COPY --from=sessions-builder /app/services/sessions/sessions /sessions
+COPY --from=sessions-builder /app/services/sessions/.env /.env
+USER nonroot:nonroot
+ENTRYPOINT [ "/sessions" ]
+
+FROM gcr.io/distroless/base-debian12 AS uploads-prod
+WORKDIR /
+COPY --from=uploads-builder /app/services/uploads/uploads-app /uploads-app
+COPY --from=uploads-builder /app/services/uploads/.env /.env
+USER nonroot:nonroot
+EXPOSE 8080
+ENTRYPOINT [ "/uploads-app" ]
