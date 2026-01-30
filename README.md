@@ -101,6 +101,16 @@ This section provides the diagrams for different layers of abstration in the sys
 ### Initial High-Level Design Sketch
 ![Initial Design Sketch](https://github.com/Yulian302/lfusys-infra/blob/196796faccfee576463794a84295194094da6d1e/design/design.png)
 
+## Resources
+### Redis
+| Usage    | Critical | On failure |
+| -------- | ------- | ------- |
+| Rate limit | No | Rate limit disabled |
+| Caching | No | Caching disabled. Responses are slower, more expensive |
+| OAuth State Storage | No | Frontend state is not stored. Small security breach |
+
+Redis is not critical for the system. It's a soft dependency for other components. Only **ONE** redis instance is fine for now to do all the work.
+
 ## Evolved Service Interactions Diagram
 ```mermaid
 
