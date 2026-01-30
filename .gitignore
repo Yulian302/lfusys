@@ -1,2 +1,5 @@
 
 .history
+
+# env files
+.env.prod
