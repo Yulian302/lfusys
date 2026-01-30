@@ -123,8 +123,8 @@ flowchart LR
     UW --> S3[("S3 Object Storage")]
 ```
 
-### UPDATED 14/01/2026
-![SI diagram](https://github.com/Yulian302/lfusys-infra/blob/master/design/evolution/14-01-2026-service-interaction-diagram.png)
+### UPDATED 15/01/2026
+![SI diagram](https://github.com/Yulian302/lfusys-infra/blob/master/design/evolution/15-01-2026.png)
 
 
 ## Sequence Diagrams
