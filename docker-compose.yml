@@ -58,5 +58,14 @@ services:
       - redis_data:/data
     command: ["redis-server", "--appendonly","yes"]
 
+  # resources for testing
+  localstack:
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=dynamodb,sqs
+      - AWS_DEFAULT_REGION=us-east-1
+
 volumes:
   redis_data:
