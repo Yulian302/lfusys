@@ -9,6 +9,7 @@ services:
     env_file:
       - ./backend/services/gateway/.env
     depends_on:
+      - jaeger
       - sessions
     volumes:
       - ./backend/services/gateway:/app/services/gateway
@@ -21,6 +22,8 @@ services:
       target: sessions
     env_file:
       - ./backend/services/sessions/.env
+    depends_on:
+      - jaeger
     volumes:
       - ./backend/services/sessions:/app/services/sessions
       - ./backend/services/commons:/app/services/commons
@@ -32,6 +35,8 @@ services:
       target: uploads
     env_file:
       - ./backend/services/uploads/.env
+    depends_on:
+      - jaeger
     ports:
       - "8081:8080" # only for testing
     volumes:
@@ -66,6 +71,20 @@ services:
     environment:
       - SERVICES=dynamodb,sqs
       - AWS_DEFAULT_REGION=us-east-1
+
+
+  # for distributed tracing
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686" # UI
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+      - "6831:6831/udp" # legacy agent
+
 
 volumes:
   redis_data:
