@@ -88,8 +88,12 @@ services:
       context: ./frontend/lfusys-app/
       dockerfile: Dockerfile.prod
       args:
-        VITE_GATEWAY_API_URL: http://localhost:8080
-        VITE_UPLOADS_API_URL: http://localhost:8081
+        VITE_GATEWAY_API_URL: http://localhost:8080/api/v1
+        VITE_UPLOADS_API_URL: http://localhost:8081/api/v1
+        VITE_GITHUB_CLIENT_ID: Ov23ligIk1n1MnNXDZWA
+        VITE_GITHUB_REDIRECT_URI: http://localhost:8080/api/v1/auth/github/callback
+        VITE_GOOGLE_CLIENT_ID: 441188855882-r9hj22sh2939r6nj0jnjn1mo8tkoua6q.apps.googleusercontent.com
+        VITE_GOOGLE_REDIRECT_URI: http://localhost:8080/api/v1/auth/google/callback
     ports:
       - "80:8080"
     networks:
