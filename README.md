@@ -9,6 +9,79 @@ The repository contains backend Go services (gateway, sessions, uploads, shared 
 - Infra: Terraform modules (**DynamoDB**, **S3**, **SQS**, other mandatory cloud and security services).
 - Dev: **Docker Compose** for local development.
 
+## Deployment 🚀
+### Using Docker <span style="vertical-align: middle;">![Docker](https://img.shields.io/badge/-blue?logo=docker&logoColor=white)
+</span>
+This project supports two deployment modes:
+- **Development mode** - with tracing, verbose logging, hot reload and observability tools.
+- **Production mode** - minimal images w/o development tools and containers, optimized for performance.
+
+#### Development mode <span style="vertical-align: middle;">![dev](https://img.shields.io/badge/-white?logo=dev.to&logoColor=black&style=plastic)
+</span>
+Includes:
+
+- Structured debug logging
+- Comprehensive app events logging
+- OpenTelemetry tracing
+- Jaeger UI
+- Hot reload using Air (if enabled)
+- Swagger API docs
+#### Prerequisites 📦
+- Docker >= 24
+- Docker Compose v2
+
+#### How to run ▶️
+Running from project root:
+```bash
+docker compose -f docker-compose.yml up --build
+```
+This will start:
+| Service    |   | Port            |
+|------------|---|-----------------|
+| gateway    |   | 8080 [exposed]  |
+| sessions   |   | 50051           |
+| uploads    |   | 8081 [exposed]  |
+| frontend   |   | 3000 [exposed]  |
+| jaeger     |   | 16686 [exposed] |
+| localstack |   | 4566 [exposed]  |
+
+WebUI access locally: http://localhost:3000
+
+#### Production mode <span style="vertical-align: middle;">![dev](https://img.shields.io/badge/-white?logo=protodotio&logoColor=black&style=plastic)
+</span>
+
+Production mode is optimized for:
+
+- Smaller image size
+- No debug tooling
+- No Swagger
+- Info-level event logging
+- Tracing disabled (unless explicitly enabled)
+- Images are built using multi-stage Docker builds.
+
+#### How to run ▶️
+You can either pull existing images from DockerHub or build them by yourself.
+#### Pull images from DockerHub:
+Running from project root:
+```bash
+docker compose -f docker-compose.prod.hub.yml up
+```
+OR
+#### Build the images:
+Running from project root:
+```bash
+docker compose -f docker-compose.prod.yml up --build
+```
+This will start:
+| Service  |   | Port           |
+|----------|---|----------------|
+| gateway  |   | 8080 [exposed] |
+| sessions |   | 50051          |
+| uploads  |   | 8081 [exposed] |
+| frontend |   | 80 [exposed]   |
+
+WebUI access locally: http://localhost
+
 ## Contents
 - backend/: Go services, infra, modules, shared code
 - frontend/: Vite + React app (`lfusys-app`)
@@ -103,11 +176,11 @@ This section provides the diagrams for different layers of abstration in the sys
 
 ## Resources
 ### Redis
-| Usage    | Critical | On failure |
-| -------- | ------- | ------- |
-| Rate limit | No | Rate limit disabled |
-| Caching | No | Caching disabled. Responses are slower, more expensive |
-| OAuth State Storage | No | Frontend state is not stored. Small security breach |
+| Usage               | Critical | On failure                                             |
+|---------------------|----------|--------------------------------------------------------|
+| Rate limit          | No       | Rate limit disabled                                    |
+| Caching             | No       | Caching disabled. Responses are slower, more expensive |
+| OAuth State Storage | No       | Frontend state is not stored. Small security breach    |
 
 Redis is not critical for the system. It's a soft dependency for other components. Only **ONE** redis instance is fine for now to do all the work.
 
