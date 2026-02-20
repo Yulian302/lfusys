@@ -13,6 +13,7 @@ The repository contains backend Go services (gateway, sessions, uploads, shared 
 ### Using Docker <span style="vertical-align: middle;">![Docker](https://img.shields.io/badge/-blue?logo=docker&logoColor=white)
 </span>
 This project supports two deployment modes:
+
 - **Development mode** - with tracing, verbose logging, hot reload and observability tools.
 - **Production mode** - minimal images w/o development tools and containers, optimized for performance.
 
