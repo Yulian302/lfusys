@@ -9,6 +9,12 @@ The repository contains backend Go services (gateway, sessions, uploads, shared 
 - Infra: Terraform modules (**DynamoDB**, **S3**, **SQS**, other mandatory cloud and security services).
 - Dev: **Docker Compose** for local development.
 
+## Preview
+| | | |
+|:---:|:---:|:---:|
+| ![Preview1](https://github.com/Yulian302/lfusys-infra/raw/bf5509d0bced15f03195611f95edac1f256eb742/previews/preview_1.png) | ![Preview1Extra](https://github.com/Yulian302/lfusys-infra/raw/bf5509d0bced15f03195611f95edac1f256eb742/previews/preview_1_extra.png) | ![Preview2](https://github.com/Yulian302/lfusys-infra/raw/bf5509d0bced15f03195611f95edac1f256eb742/previews/preview_2.png) |
+| ![Preview3](https://github.com/Yulian302/lfusys-infra/raw/bf5509d0bced15f03195611f95edac1f256eb742/previews/preview_3.png) | ![Preview4](https://github.com/Yulian302/lfusys-infra/raw/bf5509d0bced15f03195611f95edac1f256eb742/previews/preview_4.png) | ![Preview5](https://github.com/Yulian302/lfusys-infra/raw/bf5509d0bced15f03195611f95edac1f256eb742/previews/preview_5.png) |
+
 ## Deployment 🚀
 ### Using Docker <span style="vertical-align: middle;">![Docker](https://img.shields.io/badge/-blue?logo=docker&logoColor=white)
 </span>
