@@ -7,13 +7,25 @@ A distributed microservices-based system for large file uploads with comprehensi
 **LFUSYS** is a production-ready file upload system designed to handle large files efficiently through a modern microservices architecture. The backend is built with **Go**, featuring **Gin** for HTTP and **gRPC** for inter-service communication. The frontend is a responsive **React + TypeScript** application powered by **Vite**.
 
 ### Technology Stack
-- **Backend**: Go 1.x, Gin, gRPC, DynamoDB, SQS, Redis, S3
+- **Backend**: Go 1.25.5, Gin, REST, gRPC, Redis, AWS (DynamoDB, SQS, S3)
 - **Frontend**: React 18+, TypeScript, Vite, Tailwind CSS
 - **Infrastructure**: Terraform (AWS), Docker & Docker Compose
 - **Observability**: OpenTelemetry, Jaeger, structured logging
-- **DevOps**: Multi-stage Docker builds, GitHub Actions ready
+- **Testing**: Go tests with Localstack for AWS service emulation
+- **DevOps**: Multi-stage Docker builds
 
 ## Preview
+
+Pages:
+ - Home (part 1)
+ - Home (part 2)
+ - Login/Register
+ - Upload (part 1)
+ - Upload (part 2)
+ - Files
+
+correspondingly...
+
 |                                                                                                                            |                                                                                                                                       |                                                                                                                            |
 |:--------------------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------:|
 | ![Preview1](https://github.com/Yulian302/lfusys-infra/raw/bf5509d0bced15f03195611f95edac1f256eb742/previews/preview_1.png) | ![Preview1Extra](https://github.com/Yulian302/lfusys-infra/raw/bf5509d0bced15f03195611f95edac1f256eb742/previews/preview_1_extra.png) | ![Preview2](https://github.com/Yulian302/lfusys-infra/raw/bf5509d0bced15f03195611f95edac1f256eb742/previews/preview_2.png) |
@@ -76,7 +88,7 @@ pnpm build
 
 ### Environment Variables
 
-Services read configuration from environment variables. Check `.env.example` for shared env variables (all services), or `/backend/services/<service_name>/.env.example` for service-specific env variables.
+Services read configuration from environment variables. Check `.env.example` for shared variables (all services) or `/backend/services/<service_name>/.env.example` for service-specific variables.
 
 ## Deployment 🚀
 
@@ -103,15 +115,15 @@ docker compose -f docker-compose.yml up --build
 ```
 
 **Services & Ports**:
-| Service    | Port            | Purpose                                |
-|------------|-----------------|----------------------------------------|
-| Gateway    | 8080 [exposed]  | HTTP API & authentication              |
-| Sessions   | 50051           | gRPC service (internal)                |
-| Uploads    | 8081 [exposed]  | Chunk upload API                       |
-| Frontend   | 3000 [exposed]  | React application                      |
-| Jaeger     | 16686 [exposed] | Trace visualization                    |
-| LocalStack | 4566 [exposed]  | Local AWS services (S3, DynamoDB, SQS) |
-| Redis      | 6379            | Cache, rate limiting & State Storage   |
+| Service    | Port            | Purpose                                                |
+|------------|-----------------|--------------------------------------------------------|
+| Gateway    | 8080 [exposed]  | HTTP API & authentication                              |
+| Sessions   | 50051           | gRPC service (internal)                                |
+| Uploads    | 8081 [exposed]  | Chunk upload API                                       |
+| Frontend   | 3000 [exposed]  | React application                                      |
+| Jaeger     | 16686 [exposed] | Trace visualization                                    |
+| LocalStack | 4566 [exposed]  | Local AWS services (S3, DynamoDB, SQS) for TESTS ONLY! |
+| Redis      | 6379            | Cache, Rate Limiting & OAuth States                    |
 
 **WebUI**: http://localhost:3000
 
@@ -146,10 +158,10 @@ docker compose -f docker-compose.prod.yml up --build
 
 **WebUI**: http://localhost
 
-### AWS Cloud Deployment
+### AWS Cloud Deployment ![Cloud](https://img.shields.io/badge/AWS-blue?logo=iCloud&color=white)
 
 For production deployments on AWS, refer to the [infrastructure documentation](backend/infra/README.md) for:
-- Terraform configurations for VPC, RDS, DynamoDB, S3, etc.
+- Terraform configurations for VPC, ECS, DynamoDB, S3, etc.
 - CloudWatch monitoring and alarms
 - Load balancer setup
 - Auto-scaling groups
@@ -167,10 +179,11 @@ For production deployments on AWS, refer to the [infrastructure documentation](b
 │   ├── infra/                   # Infrastructure as Code
 │   │   ├── aws/                 # AWS cloud architecture diagrams
 │   │   ├── environments/        # Terraform configs (DEV & PROD)
-│   │   └── design/              # Architecture & design diagrams
+│   │   ├── design/              # Architecture & design diagrams
+│   │   └── previews/            # Frontend pages previews
 │   ├── Dockerfile.dev           # Development image with hot reload
 │   ├── Dockerfile.prod          # Production optimized image
-│   └── Makefile
+│   └── Makefile                 # Service level commands
 ├── frontend/
 │   └── lfusys-app/              # React + Vite application
 │       ├── src/
@@ -244,7 +257,7 @@ For production deployments on AWS, refer to the [infrastructure documentation](b
 1. **User Authentication**: React frontend authenticates via JWT or OAuth2 (GitHub/Google)
 2. **Session Initialization**: Gateway creates an upload session via gRPC, Sessions service reserves S3 resources and stores metadata in DynamoDB
 3. **Parallel Upload**: Frontend chunks the file and uploads pieces concurrently to the Uploads service workers
-4. **Chunk Processing**: Each Uploads worker validates integrity and persists chunks to S3. S3 emits events to SQS
+4. **Chunk Processing**: Each Uploads worker validates integrity and persists chunks to S3, which emits events to SQS on upload completeness
 5. **Async Finalization**: Sessions service consumes SQS events, aggregates chunks, and finalizes the S3 multi-part upload
 6. **Completion**: Session is marked complete, frontend receives upload confirmation
 
@@ -350,10 +363,6 @@ The system provides comprehensive observability through:
 - Readiness endpoints for graceful deployments
 - Dependency checks (database, cache, S3 connectivity)
 
-### Metrics
-- Prometheus-compatible metrics endpoints
-- Request latency, error rates, and throughput tracking
-- Custom business metrics (uploads, chunks processed, etc.)
 
 ## Resources & Data Storage
 
@@ -378,7 +387,7 @@ Used for non-critical caching and state management across the system:
 | File chunks      | S3 (object)     | -                |
 | Events/messaging | SQS             | -                |
 
-**DynamoDB:** Single-writer Data Model with Read-only replicas is configured in terraform prod project for AWS deployment.
+**DynamoDB:** Single-Writer Data Model with Read-Only replicas is configured in terraform prod project for AWS deployment.
 
 ## Architecture & Design
 
