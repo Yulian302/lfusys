@@ -1,116 +1,270 @@
 # LFUSYS
 
-A microservices-based large file upload system with a React frontend.
-The repository contains backend Go services (gateway, sessions, uploads, shared commons), Terraform infra, and a Vite + React frontend.
+A distributed microservices-based system for large file uploads with comprehensive tracing, authentication, and cloud-native deployment options.
 
-## Quick Summary
-- Language: **Go** (backend services using **Gin** and **gRPC**) and **TypeScript/React** (frontend).
-- Services: `gateway`, `sessions`, `uploads`, `commons` (shared libs).
-- Infra: Terraform modules (**DynamoDB**, **S3**, **SQS**, other mandatory cloud and security services).
-- Dev: **Docker Compose** for local development.
+## 🎯 Project Overview
+
+**LFUSYS** is a production-ready file upload system designed to handle large files efficiently through a modern microservices architecture. The backend is built with **Go**, featuring **Gin** for HTTP and **gRPC** for inter-service communication. The frontend is a responsive **React + TypeScript** application powered by **Vite**.
+
+### Technology Stack
+- **Backend**: Go 1.x, Gin, gRPC, DynamoDB, SQS, Redis, S3
+- **Frontend**: React 18+, TypeScript, Vite, Tailwind CSS
+- **Infrastructure**: Terraform (AWS), Docker & Docker Compose
+- **Observability**: OpenTelemetry, Jaeger, structured logging
+- **DevOps**: Multi-stage Docker builds, GitHub Actions ready
 
 ## Preview
-| | | |
-|:---:|:---:|:---:|
+|                                                                                                                            |                                                                                                                                       |                                                                                                                            |
+|:--------------------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------:|
 | ![Preview1](https://github.com/Yulian302/lfusys-infra/raw/bf5509d0bced15f03195611f95edac1f256eb742/previews/preview_1.png) | ![Preview1Extra](https://github.com/Yulian302/lfusys-infra/raw/bf5509d0bced15f03195611f95edac1f256eb742/previews/preview_1_extra.png) | ![Preview2](https://github.com/Yulian302/lfusys-infra/raw/bf5509d0bced15f03195611f95edac1f256eb742/previews/preview_2.png) |
-| ![Preview3](https://github.com/Yulian302/lfusys-infra/raw/bf5509d0bced15f03195611f95edac1f256eb742/previews/preview_3.png) | ![Preview4](https://github.com/Yulian302/lfusys-infra/raw/bf5509d0bced15f03195611f95edac1f256eb742/previews/preview_4.png) | ![Preview5](https://github.com/Yulian302/lfusys-infra/raw/bf5509d0bced15f03195611f95edac1f256eb742/previews/preview_5.png) |
+| ![Preview3](https://github.com/Yulian302/lfusys-infra/raw/bf5509d0bced15f03195611f95edac1f256eb742/previews/preview_3.png) |      ![Preview4](https://github.com/Yulian302/lfusys-infra/raw/bf5509d0bced15f03195611f95edac1f256eb742/previews/preview_4.png)       | ![Preview5](https://github.com/Yulian302/lfusys-infra/raw/bf5509d0bced15f03195611f95edac1f256eb742/previews/preview_5.png) |
 
-## Deployment 🚀
-### Using Docker <span style="vertical-align: middle;">![Docker](https://img.shields.io/badge/-blue?logo=docker&logoColor=white)
-</span>
-This project supports two deployment modes:
+## 💻 Development
 
-- **Development mode** - with tracing, verbose logging, hot reload and observability tools.
-- **Production mode** - minimal images w/o development tools and containers, optimized for performance.
-
-#### Development mode <span style="vertical-align: middle;">![dev](https://img.shields.io/badge/-white?logo=dev.to&logoColor=black&style=plastic)
-</span>
-Includes:
-
-- Structured debug logging
-- Comprehensive app events logging
-- OpenTelemetry tracing
-- Jaeger UI
-- Hot reload using Air (if enabled)
-- Swagger API docs
-#### Prerequisites 📦
+### Prerequisites
 - Docker >= 24
 - Docker Compose v2
+- Go 1.x (optional, for local service development)
+- Node.js 18+ with pnpm (optional, for frontend development)
 
-#### How to run ▶️
-Running from project root:
+### Quick Start
+Clone and start the development environment:
+
+```bash
+git clone https://github.com/yourusername/lfusys.git
+cd lfusys
+docker compose up --build
+```
+
+The system will be available at:
+- **Frontend**: http://localhost:3000
+- **Gateway API**: http://localhost:8080
+- **Uploads API**: http://localhost:8081
+- **Jaeger UI**: http://localhost:16686 (trace visualization)
+- **LocalStack**: http://localhost:4566 (local AWS services)
+
+### Running Services Individually
+
+#### Backend Services
+```bash
+# From backend/services directory
+cd backend/services
+
+# Start all services
+make run
+
+# Start specific service
+go run ./gateway/main.go
+go run ./sessions/main.go
+go run ./uploads/main.go
+```
+
+#### Frontend
+```bash
+# From frontend/lfusys-app directory
+cd frontend/lfusys-app
+
+# Install dependencies
+pnpm install
+
+# Start dev server with hot reload
+pnpm dev
+
+# Build for production
+pnpm build
+```
+
+### Environment Variables
+
+Services read configuration from environment variables. Check `.env.example` for shared env variables (all services), or `/backend/services/<service_name>/.env.example` for service-specific env variables.
+
+## Deployment 🚀
+
+### Using Docker 🐳
+
+Two optimized deployment modes are available:
+
+#### Development Mode
+Ideal for local development with **full observability**:
+
+**Includes**:
+- Structured debug logging (JSON format)
+- Comprehensive application event logging
+- OpenTelemetry distributed tracing
+- Jaeger UI for trace visualization
+- Hot reload using Air
+- Gin debug mode with verbose output
+- Swagger API documentation
+- LocalStack for local AWS services
+
+**How to run**:
 ```bash
 docker compose -f docker-compose.yml up --build
 ```
-This will start:
-| Service    |   | Port            |
-|------------|---|-----------------|
-| gateway    |   | 8080 [exposed]  |
-| sessions   |   | 50051           |
-| uploads    |   | 8081 [exposed]  |
-| frontend   |   | 3000 [exposed]  |
-| jaeger     |   | 16686 [exposed] |
-| localstack |   | 4566 [exposed]  |
 
-WebUI access locally: http://localhost:3000
+**Services & Ports**:
+| Service    | Port            | Purpose                                |
+|------------|-----------------|----------------------------------------|
+| Gateway    | 8080 [exposed]  | HTTP API & authentication              |
+| Sessions   | 50051           | gRPC service (internal)                |
+| Uploads    | 8081 [exposed]  | Chunk upload API                       |
+| Frontend   | 3000 [exposed]  | React application                      |
+| Jaeger     | 16686 [exposed] | Trace visualization                    |
+| LocalStack | 4566 [exposed]  | Local AWS services (S3, DynamoDB, SQS) |
+| Redis      | 6379            | Cache, rate limiting & State Storage   |
 
-#### Production mode <span style="vertical-align: middle;">![dev](https://img.shields.io/badge/-white?logo=protodotio&logoColor=black&style=plastic)
-</span>
+**WebUI**: http://localhost:3000
 
-Production mode is optimized for:
+#### Production Mode
+Optimized for performance and minimal resource footprint:
 
-- Smaller image size
-- No debug tooling
-- No Swagger
-- Info-level event logging
-- Tracing disabled (unless explicitly enabled)
-- Images are built using multi-stage Docker builds.
+**Optimizations**:
+- Minimal image size via multi-stage builds
+- No debug tools or Swagger documentation
+- Info-level event logging only
+- Tracing disabled by default (opt-in via env var)
+- Compressed binary artifacts
+- No source code in final images
 
-#### How to run ▶️
-You can either pull existing images from DockerHub or build them by yourself.
-#### Pull images from DockerHub:
-Running from project root:
+**How to run** (Pull from DockerHub):
 ```bash
 docker compose -f docker-compose.prod.hub.yml up
 ```
-OR
-#### Build the images:
-Running from project root:
+
+**How to run** (Build locally):
 ```bash
 docker compose -f docker-compose.prod.yml up --build
 ```
-This will start:
-| Service  |   | Port           |
-|----------|---|----------------|
-| gateway  |   | 8080 [exposed] |
-| sessions |   | 50051          |
-| uploads  |   | 8081 [exposed] |
-| frontend |   | 80 [exposed]   |
 
-WebUI access locally: http://localhost
+**Services & Ports**:
+| Service  | Port           | Purpose               |
+|----------|----------------|-----------------------|
+| Gateway  | 8080 [exposed] | HTTP API              |
+| Sessions | 50051          | gRPC (internal)       |
+| Uploads  | 8081 [exposed] | File upload API       |
+| Frontend | 80 [exposed]   | React app (via Nginx) |
+
+**WebUI**: http://localhost
+
+### AWS Cloud Deployment
+
+For production deployments on AWS, refer to the [infrastructure documentation](backend/infra/README.md) for:
+- Terraform configurations for VPC, RDS, DynamoDB, S3, etc.
+- CloudWatch monitoring and alarms
+- Load balancer setup
+- Auto-scaling groups
+- Network security groups
 
 ## Contents
-- backend/: Go services, infra, modules, shared code
-- frontend/: Vite + React app (`lfusys-app`)
-- docker-compose.yml, Makefiles and per-service Dockerfiles
+
+```
+├── backend/
+│   ├── services/                 # Go microservices
+│   │   ├── gateway/             # API gateway & auth service
+│   │   ├── sessions/            # Upload session management
+│   │   ├── uploads/             # File chunk processing
+│   │   └── commons/             # Shared libraries & utilities
+│   ├── infra/                   # Infrastructure as Code
+│   │   ├── aws/                 # AWS cloud architecture diagrams
+│   │   ├── environments/        # Terraform configs (DEV & PROD)
+│   │   └── design/              # Architecture & design diagrams
+│   ├── Dockerfile.dev           # Development image with hot reload
+│   ├── Dockerfile.prod          # Production optimized image
+│   └── Makefile
+├── frontend/
+│   └── lfusys-app/              # React + Vite application
+│       ├── src/
+│       │   ├── components/      # Reusable React components
+│       │   ├── pages/           # Route pages
+│       │   ├── features/        # Feature modules
+│       │   ├── hooks/           # Custom React hooks
+│       │   ├── contexts/        # React contexts
+│       │   ├── api/             # API integration
+│       │   └── utils/           # Utility functions
+│       ├── Dockerfile.dev       # Development image
+│       └── Dockerfile.prod      # Production image with Nginx
+├── docker-compose.yml           # Development environment
+├── docker-compose.prod.yml      # Production build (local)
+├── docker-compose.prod.hub.yml  # Production (DockerHub images)
+└── Makefile                     # Root level commands
+```
+
+## Contents
+- **backend/**: Go services, infrastructure-as-code, shared libraries
+- **frontend/**: Vite + React app with Tailwind CSS styling
+- **Docker Compose & Makefiles**: Local development and deployment tooling
+
+## 🏗️ Microservices Architecture
+
+### Services Overview
+
+#### Gateway Service
+- **Role**: API gateway, entry point for all client requests
+- **Responsibilities**:
+  - HTTP request routing and validation
+  - User authentication (JWT & OAuth2)
+  - Session creation and management delegation to Sessions service
+  - User profile and auth operations
+- **Port**: 8080 (exposed)
+- **Dependencies**: DynamoDB (users), Sessions service (gRPC)
+
+#### Sessions Service
+- **Role**: Upload session lifecycle management
+- **Responsibilities**:
+  - Create and manage upload sessions
+  - Track upload progress and metadata
+  - Finalize uploads using S3 Multi-part Upload or Streaming
+  - Consume S3 chunk uploaded events from SQS
+  - Update session status and aggregate chunk validation
+- **Port**: 50051 (gRPC, internal)
+- **Dependencies**: DynamoDB (session metadata), SQS (events), S3 (object storage)
+
+#### Uploads Service
+- **Role**: Distributed chunk handling and S3 integration
+- **Responsibilities**:
+  - Validate and process individual file chunks
+  - Persist chunks to S3 object storage
+- **Port**: 8081 (exposed)
+- **Dependencies**: S3 (chunk storage)
+
+#### Commons Library
+- **Role**: Shared infrastructure and utilities
+- **Provides**:
+  - Error handling and response formatting
+  - JWT middleware and token validation
+  - Redis-based caching and rate limiting
+  - Health checks and graceful shutdowns
+  - Jaeger integration for distributed tracing
+  - AWS SDK helpers (DynamoDB, S3, SQS)
+  - Structured logging with JSON output
+
 
 ## How it works (high-level)
-- The React frontend talks to the `gateway` service for auth and uploads session creation.
-- `gateway` implements HTTP routes and delegates business logic to internal service implementations (AuthService, UploadsService). `gateway` talks to `session` service via **gRPC** to create upload session.
-- `session` service persists session metadata (DynamoDB) and manages the status of upload.
 
-**At the same time**
-- Frontend breaks the whole file into chunks and upload them to `upload` service workers in parallel.
-- `upload` service consists of multiple workers that validate the upload integrity, persist uploaded chunks to AWS S3 object store and update the status of upload.
-- When upload is complete, last `upload` worker puts the session ID into the distributed FIFO queue (AWS SQS).
-- `session` service consumes the upload sessions from the queue and creates a final `File` object using assembly-based approach for contents storage.
+1. **User Authentication**: React frontend authenticates via JWT or OAuth2 (GitHub/Google)
+2. **Session Initialization**: Gateway creates an upload session via gRPC, Sessions service reserves S3 resources and stores metadata in DynamoDB
+3. **Parallel Upload**: Frontend chunks the file and uploads pieces concurrently to the Uploads service workers
+4. **Chunk Processing**: Each Uploads worker validates integrity and persists chunks to S3. S3 emits events to SQS
+5. **Async Finalization**: Sessions service consumes SQS events, aggregates chunks, and finalizes the S3 multi-part upload
+6. **Completion**: Session is marked complete, frontend receives upload confirmation
 
-## Authentication
-### JWT
-JWT authentication is implemented under the hood with the best security practices. It is a default authentication mechanism.
-### OAuth2
-Third-party authentication mechanism is enabled. Users can choose among the following providers: **Github**, **Google**.
-#### OAuth2 Providers UML diagram
+
+## 🔐 Authentication & Security
+
+### JWT (Primary)
+JSON Web Tokens serve as the default authentication mechanism with industry best practices:
+- **Token Type**: Access + Refresh tokens (HTTPOnly cookies)
+- **Signing**: HS256 with strong secrets
+- **Validation**: Signature, expiration, and user status checks
+- **Scope**: User identity and permissions
+
+### OAuth2 (Federated)
+Third-party authentication providers allow users to sign in with existing credentials:
+- **Supported Providers**: GitHub, Google
+- **Flow**: Authorization Code Grant with PKCE
+- **Fallback**: JWT issued after OAuth authentication
+
+### OAuth2 Provider Architecture
 ```mermaid
 ---
 config:
@@ -175,37 +329,82 @@ classDiagram
 ```
 This architecture can be improved further, but it is an overhead for the system (no more third-party auth providers will be added).
 
-# Architecture
-This section provides the diagrams for different layers of abstration in the system. It also includes design scratches `as is` to show how system changed and evolved. Initial diagrams may have flaws and may be overly opinionated, but it greatly depicts the engineer's thinking process and how can one come to a better architecture over time.
+## 📊 Observability & Monitoring
 
-### Initial High-Level Design Sketch
-![Initial Design Sketch](https://github.com/Yulian302/lfusys-infra/blob/196796faccfee576463794a84295194094da6d1e/design/design.png)
+The system provides comprehensive observability through:
 
-## Resources
+### Logging
+- Structured JSON logging across all services
+- Configurable log levels (debug, info, warn, error)
+- Centralized collection via Docker logging drivers
+- CloudWatch integration in production
+
+### Distributed Tracing
+- OpenTelemetry instrumentation in all services
+- Request correlation across service boundaries
+- Jaeger backend for trace storage and visualization
+- 100% sampling in development, configurable in production
+
+### Health Checks
+- Liveness probes on all services
+- Readiness endpoints for graceful deployments
+- Dependency checks (database, cache, S3 connectivity)
+
+### Metrics
+- Prometheus-compatible metrics endpoints
+- Request latency, error rates, and throughput tracking
+- Custom business metrics (uploads, chunks processed, etc.)
+
+## Resources & Data Storage
+
 ### Redis
-| Usage               | Critical | On failure                                             |
-|---------------------|----------|--------------------------------------------------------|
-| Rate limit          | No       | Rate limit disabled                                    |
-| Caching             | No       | Caching disabled. Responses are slower, more expensive |
-| OAuth State Storage | No       | Frontend state is not stored. Small security breach    |
+Used for non-critical caching and state management across the system:
 
-Redis is not critical for the system. It's a soft dependency for other components. Only **ONE** redis instance is fine for now to do all the work.
+| Usage               | Critical | Graceful Degradation               |
+|---------------------|----------|------------------------------------|
+| Rate limiting       | No       | Rate limiting disabled             |
+| OAuth state storage | No       | Session replay protection disabled |
+| General caching     | No       | Cache misses increase latency      |
 
-## Evolved Service Interactions Diagram
+**Note**: Single Redis instance is sufficient for current scale. Horizontal scaling via Redis Cluster can be added as needed.
+
+### Data Storage
+
+| Service          | Primary Storage | Backup/Analytics |
+|------------------|-----------------|------------------|
+| User data        | DynamoDB        | -                |
+| Session metadata | DynamoDB        | -                |
+| Files metadata   | DynamoDB        | -                |
+| File chunks      | S3 (object)     | -                |
+| Events/messaging | SQS             | -                |
+
+**DynamoDB:** Single-writer Data Model with Read-only replicas is configured in terraform prod project for AWS deployment.
+
+## Architecture & Design
+
+Detailed architecture documentation is available in [backend/infra/](backend/infra/README.md):
+- AWS network and service dependency diagrams
+- Design evolution and iteration history
+- Infrastructure-as-code (Terraform) configurations
+- Cloud deployment patterns
+
+## System Design
+
+### Service Interaction Diagram
+The following diagram shows how services interact at a high level:
+
 ```mermaid
-
 flowchart LR
-    FE["React Frontend"] <-- HTTP --> GW["Gateway"]
-    GW <-- gRPC --> US["Sessions Service"]
-    US --> DDB1[("DynamoDB Uploads")]
-    GW --> DDB2[("DynamoDB Users")]
-    FE <-- HTTP --> UW["Upload Service"]
-    UW --> S3[("S3 Object Storage")]
+    FE["React Frontend"] <-- "HTTP" --> GW["Gateway"]
+    GW <-- "gRPC" --> SS["Sessions Service"]
+    SS --> DDB1[("DynamoDB<br/>Uploads")]
+    SS --> DDB3[("DynamoDB<br/>Files")]
+    GW --> DDB2[("DynamoDB<br/>Users")]
+    FE <-- "HTTP" --> UW["Upload Service"]
+    UW --> S3[("S3<br/>Chunk Storage")]
+    S3[("S3<br/>Chunk Storage")] --> SQS
+    SS --> SQS[("SQS<br/>Events")]
 ```
-
-### UPDATED 15/01/2026
-![SI diagram](https://github.com/Yulian302/lfusys-infra/blob/master/design/evolution/15-01-2026.png)
-
 
 ## Sequence Diagrams
 Here are a few sequence diagrams that represent core auth and business logic.
