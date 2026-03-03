@@ -261,6 +261,48 @@ For production deployments on AWS, refer to the [infrastructure documentation](b
 5. **Async Finalization**: Sessions service consumes SQS events, aggregates chunks, and finalizes the S3 multi-part upload
 6. **Completion**: Session is marked complete, frontend receives upload confirmation
 
+## Deep Dives
+In this section some of really important scenarios and system behaviour will be explained in details. What problems could arise in a distributed environment and how they were mitigated in the system.
+
+### Distributed Queue (SQS)
+The distributed queue is used to stream upload events directly from S3 chunk storage to Sessions Service. When the chunk is uploaded to **/uploads/{upload_id}/chunk{idx}**, S3 (producer) emits this event to SQS. Sessions Service consumes and processes these events by updating upload metadata and creating a file when upload is finished.
+
+**Resilience Strategy** 🛡️
+
+1. **Logical/Application Errors (Malformed or Invalid Messages)**<br>
+We intentionally do not delete malformed messages. Instead, we allow SQS redrive policy to move them to the DLQ after exceeding maxReceiveCount. This incurs retry overhead (visibility timeout × retries) but preserves malformed payloads for observability and debugging.
+<br>
+
+**Tradeoff:** Observability and forensic visibility over short-term efficiency.
+
+2. **Transient Errors (Network, DB Throttling, Temporary Failures)**<br>
+We rely on SQS visibility timeout and redrive policy to automatically retry processing. If the transient condition resolves, the message is processed successfully. If it persists beyond retry threshold, the message is quarantined in the DLQ.
+<br>
+
+**Goal:** Self-healing behavior with bounded retry attempts.
+
+**Idempotency Strategy** 🔄
+
+In distributed systems, message delivery is at least once. A consumer may process a message and crash before deleting it, causing redelivery. Therefore, the consumer must be idempotent.
+
+The Sessions Service runs multiple background workers processing upload events concurrently. Processing consists of three idempotent stages:
+
+1. **PutChunk**<br>
+Uses DynamoDB set semantics to idempotently record uploaded chunk indices. Duplicate events do not inflate the chunk count.
+
+2. **MarkUploadComplete**<br>
+Uses an atomic conditional update (size(uploaded_chunks) = total_chunks AND status = in_progress) to guarantee a single state transition. Only one worker can move the upload into the completed state.
+
+3. **CompleteUpload / EnsureFinalized**<br>
+Finalization is idempotent:
+File creation uses attribute_not_exists(upload_id) to prevent duplicate records.
+Duplicate executions are treated as success.
+S3 finalization writes to a deterministic key and tolerates repeated execution.
+This design ensures correctness under concurrent workers and message redelivery.
+
+
+
+
 
 ## 🔐 Authentication & Security
 
