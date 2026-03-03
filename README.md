@@ -300,7 +300,21 @@ Duplicate executions are treated as success.
 S3 finalization writes to a deterministic key and tolerates repeated execution.
 This design ensures correctness under concurrent workers and message redelivery.
 
+**Scalability** 📈
 
+AWS SQS abstracts internal partitioning and scaling. Queue sharding is handled transparently by AWS, so scaling throughput is achieved by increasing consumer concurrency rather than modifying the queue itself.
+
+In this system (**AWS PROD ONLY**), scalability is achieved through:
+
+- **Horizontal Scaling (ECS Tasks)**<br>
+The Sessions Service is defined as an ECS scalable target in Terraform (prod configuration).
+Auto Scaling increases the number of ECS tasks (up to 10 instances) based on the CloudWatch metric ApproximateNumberOfMessagesVisible. In other words, scale out when queue backlog is overpopulated.
+
+- **Intra-Task Concurrency (Goroutines)**<br>
+Each ECS task runs multiple background workers (goroutines) that poll and process messages concurrently, increasing per-instance throughput. Scaling means increasing their number (**with caution**).
+
+
+This design enables elastic scaling while maintaining at-least-once processing semantics.
 
 
 
