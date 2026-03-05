@@ -316,7 +316,30 @@ Each ECS task runs multiple background workers (goroutines) that poll and proces
 
 This design enables elastic scaling while maintaining at-least-once processing semantics.
 
+### Distributed cache
+The system uses an external cache to reduce API latency and handle high read loads. In the production environment on Amazon Web Services, **Redis** is used as a distributed caching service. In the local development environment, Redis runs as a container within Docker.
 
+#### Cache Architecture
+The system uses the **Cache-Aside (lazy loading)** pattern. In this approach, the application first checks Redis for the requested data. If the data is present, it is returned directly from the cache. If it is missing, the application retrieves the data from the primary database, stores it in Redis, and then returns it to the client. This pattern keeps the cache simple and ensures that only frequently accessed data is stored.
+
+#### Eviction Policy
+In the development environment, Redis runs with the default `noeviction` policy. When memory is exhausted, write operations fail with an out-of-memory error. This behavior helps surface memory issues during development.
+
+In the production environment, Redis uses the `allkeys-lru` eviction policy, which removes the least recently used keys when memory is full, regardless of whether they have a TTL. This allows the cache to remain responsive under memory pressure.
+
+**Time-to-Live (TTL)**:
+Different data types have different expiration policies:
+- Session data: 30 mins
+- User files: 12 hours
+For user file data, cache invalidation occurs on write operations to ensure the cache does not serve stale data.
+
+#### Cache Invalidation
+To maintain consistency between the cache and the primary datastore, a cache invalidation on write strategy is used. Whenever user file data is updated, the corresponding cache entry is invalidated so that subsequent reads fetch fresh data.
+
+#### Thundering Herd
+The system does not maintain globally shared cache entries across multiple users. Cached data is scoped to individual users, which significantly reduces the likelihood of a thundering herd problem during cache expiration or eviction because cache misses are distributed across different keys rather than concentrated on a single shared entry.
+
+However, this does not completely eliminate the possibility of request bursts when cache entries expire. To further mitigate this risk, a small **random TTL jitter** is applied to expiration times. This prevents large numbers of keys from expiring simultaneously and helps smooth cache regeneration load on downstream services such as the primary database.
 
 ## 🔐 Authentication & Security
 
